@@ -17,7 +17,6 @@ module Conventional
         return nil if lines.empty?
 
         continue_breaking_change = false
-        is_body = true
 
         body = nil
         footer = nil
@@ -27,16 +26,7 @@ module Conventional
 
         header = lines.shift
 
-        header_match = header.match HEADER_PATTERN
-        header_parts = header_match ? {
-          type: header_match[:type],
-          scope: header_match[:scope],
-          subject: header_match[:subject]
-        } : {
-          type: nil,
-          scope: nil,
-          subject: nil
-        }
+        header_parts = extract_header_parts(header)
 
         current_processed_field = false
 
@@ -51,52 +41,29 @@ module Conventional
 
           if current_processed_field
             other_fields[current_processed_field.to_sym] = append(other_fields[current_processed_field], line)
+            current_processed_field = false
 
             next
           end
 
-          breaking_change_match = line.match BREAKING_CHANGE_BODY_PATTERN
-          if breaking_change_match
+          breaking_change ||= check_breaking_change_body(line)
+
+          if breaking_change
+            breaking_change = append(breaking_change, line) if continue_breaking_change
+
             continue_breaking_change = true
-            is_body = false
             footer = append(footer, line)
-
-            breaking_change = breaking_change_match[:contents]
             next
           end
 
-          if continue_breaking_change
-            breaking_change = append(breaking_change, line)
-            footer = append(footer, line)
-
-            next
-          end
-
-          if is_body
-            body = append(body, line)
-          else
-            footer = append(footer, line)
-          end
+          body = append(body, line)
         end
 
-        if breaking_change.nil?
-          breaking_header_match = header.match BREAKING_CHANGE_HEADER_PATTERN
-          if breaking_header_match
-            breaking_change = breaking_header_match[:subject]
-          end
-        end
+        breaking_change ||= check_breaking_change_header(header)
 
-        mentions_matches = raw_commit.scan(MENTION_PATTERN).flatten
-        mentions.concat(mentions_matches)
+        mentions.concat(extract_mentions(raw_commit))
 
-        revert_match = raw_commit.match REVERT_PATTERN
-        revert = revert_match ? {
-          header: revert_match[:header],
-          hash: revert_match[:hash]
-        } : {
-          header: nil,
-          hash: nil
-        }
+        revert = check_revert(raw_commit)
 
         {
           **header_parts,
@@ -111,6 +78,37 @@ module Conventional
       end
 
       private
+
+      def extract_header_parts(header)
+        header_match = header.match HEADER_PATTERN
+        {
+          type: header_match ? header_match[:type] : nil,
+          scope: header_match ? header_match[:scope] : nil,
+          subject: header_match ? header_match[:subject] : nil
+        }
+      end
+
+      def check_breaking_change_body(line)
+        match = line.match BREAKING_CHANGE_BODY_PATTERN
+        match[:contents] || "" if match
+      end
+
+      def check_breaking_change_header(header)
+        match = header.match BREAKING_CHANGE_HEADER_PATTERN
+        match[:subject] if match
+      end
+
+      def extract_mentions(raw_commit)
+        raw_commit.scan(MENTION_PATTERN).flatten
+      end
+
+      def check_revert(raw_commit)
+        match = raw_commit.match REVERT_PATTERN
+        {
+          header: match ? match[:header] : nil,
+          hash: match ? match[:hash] : nil
+        }
+      end
 
       def trim_new_lines(raw)
         raw.gsub(/\A(?:\r\n|\n|\r)+|(?:\r\n|\n|\r)+\z/, "")
