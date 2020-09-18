@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
 
   spec.authors = ["David Barrell"]
   spec.email = ["david@barrell.me"]
-  spec.licenses = "MTI"
+  spec.licenses = "MIT"
 
   spec.summary = "Utilities for working with conventional commits"
   spec.homepage = "https://github.com/dabarrell/conventional"
