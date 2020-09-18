@@ -16,6 +16,18 @@ module Conventional
         header, *lines = trim_new_lines(raw_commit).split(/\r?\n+/)
         return nil if header.nil?
 
+        Conventional::Entities::Commit.new(
+          **match_header_parts(header),
+          **extract_contents(header, lines),
+          header: header,
+          mentions: match_mentions(raw_commit),
+          revert: match_revert(raw_commit)
+        )
+      end
+
+      private
+
+      def extract_contents(header, lines)
         contents = {
           body: nil,
           footer: nil,
@@ -34,18 +46,8 @@ module Conventional
 
         contents[:breaking_change] ||= match_breaking_change_header(header)
 
-        contents = contents.transform_values { |v| trim_new_lines(v) }
-
-        Conventional::Entities::Commit.new(
-          **match_header_parts(header),
-          **contents,
-          header: header,
-          mentions: match_mentions(raw_commit),
-          revert: match_revert(raw_commit)
-        )
+        contents.transform_values { |v| trim_new_lines(v) }
       end
-
-      private
 
       def process_line(line, contents, state)
         field_match = line.match FIELD_PATTERN
