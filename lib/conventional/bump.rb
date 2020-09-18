@@ -26,9 +26,9 @@ module Conventional
       level = 2
 
       commits.each do |commit|
-        if !commit[:breaking_change].nil?
+        if !commit.breaking_change.nil?
           level = 0
-        elsif %w[feat feature].include? commit[:type]
+        elsif %w[feat feature].include? commit.type
           level = 1 if level == 2
         end
       end

@@ -41,4 +41,5 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "gem-release", "~> 2.1"
   spec.add_runtime_dependency "dry-cli", "~> 0.6.0"
+  spec.add_runtime_dependency "dry-struct", "~> 1.3.0"
 end

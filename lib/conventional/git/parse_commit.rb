@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "conventional/entities/commit"
+
 module Conventional
   module Git
     class ParseCommit
@@ -8,78 +10,74 @@ module Conventional
       BREAKING_CHANGE_BODY_PATTERN = /^[\\s|*]*(?:BREAKING CHANGE)[:\\s]+(?<contents>.*)/
       FIELD_PATTERN = /^-(.*?)-$/
       REVERT_PATTERN = /^(?:Revert|revert:)\s"?(?<header>[\s\S]+?)"?\s*This reverts commit (?<hash>\w*)\./i
-      REVERT_CORRESPONDENCE = %w[header hash]
       MENTION_PATTERN = /@([\w-]+)/
 
       def call(raw_commit:)
-        lines = trim_new_lines(raw_commit).split(/\r?\n+/)
+        header, *lines = trim_new_lines(raw_commit).split(/\r?\n+/)
+        return nil if header.nil?
 
-        return nil if lines.empty?
-
-        continue_breaking_change = false
-
-        body = nil
-        footer = nil
-        mentions = []
-        breaking_change = nil
-        other_fields = {}
-
-        header = lines.shift
-
-        header_parts = extract_header_parts(header)
-
-        current_processed_field = false
-
-        # body or footer
-        lines.each do |line|
-          field_match = line.match FIELD_PATTERN
-          if field_match
-            current_processed_field = field_match[1]
-
-            next
-          end
-
-          if current_processed_field
-            other_fields[current_processed_field.to_sym] = append(other_fields[current_processed_field], line)
-            current_processed_field = false
-
-            next
-          end
-
-          breaking_change ||= check_breaking_change_body(line)
-
-          if breaking_change
-            breaking_change = append(breaking_change, line) if continue_breaking_change
-
-            continue_breaking_change = true
-            footer = append(footer, line)
-            next
-          end
-
-          body = append(body, line)
-        end
-
-        breaking_change ||= check_breaking_change_header(header)
-
-        mentions.concat(extract_mentions(raw_commit))
-
-        revert = check_revert(raw_commit)
-
-        {
-          **header_parts,
-          body: body ? trim_new_lines(body) : nil,
-          footer: footer ? trim_new_lines(footer) : nil,
-          header: header,
-          mentions: mentions,
-          breaking_change: breaking_change ? trim_new_lines(breaking_change) : nil,
-          revert: revert,
-          **other_fields
+        contents = {
+          body: nil,
+          footer: nil,
+          breaking_change: nil
         }
+
+        initial_state = {
+          current_processed_field: false,
+          continue_breaking_change: false
+        }
+
+        contents, _ = lines.reduce([contents, initial_state]) { |input, line|
+          acc, state = input
+          next process_line(line, acc, state)
+        }
+
+        contents[:breaking_change] ||= match_breaking_change_header(header)
+
+        contents = contents.transform_values { |v| trim_new_lines(v) }
+
+        Conventional::Entities::Commit.new(
+          **match_header_parts(header),
+          **contents,
+          header: header,
+          mentions: match_mentions(raw_commit),
+          revert: match_revert(raw_commit)
+        )
       end
 
       private
 
-      def extract_header_parts(header)
+      def process_line(line, contents, state)
+        field_match = line.match FIELD_PATTERN
+        if field_match
+          state[:current_processed_field] = field_match[1]
+
+          return [contents, state]
+        end
+
+        if state[:current_processed_field]
+          contents[state[:current_processed_field].to_sym] = append(contents[state[:current_processed_field]], line)
+          state[:current_processed_field] = false
+
+          return [contents, state]
+        end
+
+        contents[:breaking_change] ||= match_breaking_change_body(line)
+
+        if contents[:breaking_change]
+          contents[:breaking_change] = append(contents[:breaking_change], line) if state[:continue_breaking_change]
+
+          state[:continue_breaking_change] = true
+          contents[:footer] = append(contents[:footer], line)
+          return [contents, state]
+        end
+
+        contents[:body] = append(contents[:body], line)
+
+        [contents, state]
+      end
+
+      def match_header_parts(header)
         header_match = header.match HEADER_PATTERN
         {
           type: header_match ? header_match[:type] : nil,
@@ -88,21 +86,21 @@ module Conventional
         }
       end
 
-      def check_breaking_change_body(line)
+      def match_breaking_change_body(line)
         match = line.match BREAKING_CHANGE_BODY_PATTERN
         match[:contents] || "" if match
       end
 
-      def check_breaking_change_header(header)
+      def match_breaking_change_header(header)
         match = header.match BREAKING_CHANGE_HEADER_PATTERN
         match[:subject] if match
       end
 
-      def extract_mentions(raw_commit)
+      def match_mentions(raw_commit)
         raw_commit.scan(MENTION_PATTERN).flatten
       end
 
-      def check_revert(raw_commit)
+      def match_revert(raw_commit)
         match = raw_commit.match REVERT_PATTERN
         {
           header: match ? match[:header] : nil,
@@ -111,7 +109,7 @@ module Conventional
       end
 
       def trim_new_lines(raw)
-        raw.gsub(/\A(?:\r\n|\n|\r)+|(?:\r\n|\n|\r)+\z/, "")
+        raw&.gsub(/\A(?:\r\n|\n|\r)+|(?:\r\n|\n|\r)+\z/, "")
       end
 
       def append(src, line)
