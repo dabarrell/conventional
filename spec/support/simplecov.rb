@@ -13,19 +13,7 @@ SimpleCov.configure do
   # Exclude test suite
   add_filter "/spec/"
 
-  if suite.ci?
-    if suite.parallel?
-      # When running tests across multiple CI jobs, output basic JSON coverage
-      # formatting only (which will be collected and marged later)
-      formatter SimpleCov::Formatter::SimpleFormatter
-    else
-      # When running tests in a single job, we can be sure we have full coverage
-      # information, so we can publish a complete buildkite annotation
-      require "simplecov-buildkite"
-      load_profile "buildkite"
-      self.formatters = [SimpleCov::Buildkite::AnnotationFormatter, SimpleCov::Formatter::HTMLFormatter]
-    end
-  end
+  self.formatters = [SimpleCov::Formatter::HTMLFormatter]
 end
 
 SimpleCov.at_exit do
