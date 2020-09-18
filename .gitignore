@@ -10,3 +10,4 @@ tmp/
 coverage.tgz
 *.gem
 .rspec_status
+Gemfile.lock
