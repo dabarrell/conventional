@@ -24,25 +24,14 @@ module Conventional
 
     def determine_level(commits)
       level = 2
-      # breaking_changes = 0
-      # features = 0
 
       commits.each do |commit|
-        if !commit[:notes].empty?
-          # breaking_changes += commit[:notes].length
+        if !commit[:breaking_change].nil?
           level = 0
         elsif %w[feat feature].include? commit[:type]
-          # features += 1
           level = 1 if level == 2
         end
       end
-
-      # puts({
-      #   level: level,
-      #   reason: breaking_changes == 1 ?
-      #     "There is #{breaking_changes} BREAKING CHANGE and #{features} features" :
-      #     "There are #{breaking_changes} BREAKING CHANGES and #{features} features"
-      # }).inspect
 
       LEVELS[level]
     end
