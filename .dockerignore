@@ -1,0 +1,8 @@
+.bundle
+.idea*
+.git*
+.dependabot/
+coverage
+docs
+log/*
+.rspec_status

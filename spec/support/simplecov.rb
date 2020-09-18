@@ -1,0 +1,38 @@
+# frozen_string_literal: true
+
+require "simplecov"
+
+suite = Test::Suite.instance
+
+# # Ensure appropriate names when running tests across multiple CI jobs
+SimpleCov.command_name(suite.test_group_name) if suite.parallel?
+
+SimpleCov.configure do
+  enable_coverage :branch
+
+  # Exclude test suite
+  add_filter "/spec/"
+
+  if suite.ci?
+    if suite.parallel?
+      # When running tests across multiple CI jobs, output basic JSON coverage
+      # formatting only (which will be collected and marged later)
+      formatter SimpleCov::Formatter::SimpleFormatter
+    else
+      # When running tests in a single job, we can be sure we have full coverage
+      # information, so we can publish a complete buildkite annotation
+      require "simplecov-buildkite"
+      load_profile "buildkite"
+      self.formatters = [SimpleCov::Buildkite::AnnotationFormatter, SimpleCov::Formatter::HTMLFormatter]
+    end
+  end
+end
+
+SimpleCov.at_exit do
+  # Don't fire if this is `rake spec` (by this point, the `rspec` command has
+  # already run and formatted its coverage results, doing this again here will
+  # overwrite them with an empty set)
+  next if $0.end_with?("rake") && $ARGV[0].to_s.start_with?("spec")
+
+  SimpleCov.result.format!
+end

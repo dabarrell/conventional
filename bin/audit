@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+
+echo "--- Running bundle audit"
+bundle exec bundle-audit update
+
+bundle exec bundle-audit check
