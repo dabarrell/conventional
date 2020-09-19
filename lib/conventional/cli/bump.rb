@@ -17,6 +17,7 @@ module Conventional
       option :level, values: %w[patch minor major], desc: "The level of bump to execute (determined automatically if not provided)"
       option :tag, type: :boolean, default: true, desc: "Create and push git tag"
       option :message, type: :string, default: Conventional::Commands::Bump::DEFAULT_COMMIT_MESSAGE, desc: "Commit message template"
+      option :push, type: :boolean, default: true, desc: "Push changes to git remote"
       option :dry_run, type: :boolean, default: false, desc: "Completes a dry run without making any changes"
 
       NoTagsFound = Class.new(StandardError)
@@ -36,7 +37,7 @@ module Conventional
         super()
       end
 
-      def call(tag:, message:, dry_run:, level: nil, **)
+      def call(tag:, message:, dry_run:, push:, level: nil, **)
         if level.nil?
           most_recent_tag = get_sem_ver_tags.call.first
           pre_major = most_recent_tag ? most_recent_tag.version < Gem::Version.new("1.0.0") : true
@@ -45,7 +46,7 @@ module Conventional
           level = determine_level.call(commits: commits, pre_major: pre_major)
         end
 
-        bump.call(level: level, tag: tag, message: message, dry_run: dry_run)
+        bump.call(level: level, tag: tag, message: message, push: push, dry_run: dry_run)
       end
 
       private
