@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require "dry/cli"
+
+$LOAD_PATH.unshift("#{__dir__}/../lib")
+require "conventional"
+
+Dry::CLI.new(Conventional::CLI).call

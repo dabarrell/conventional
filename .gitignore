@@ -1,0 +1,13 @@
+.bundle/
+.idea/
+.yardoc
+_yardoc/
+coverage/
+doc/
+pkg/
+spec/reports/
+tmp/
+coverage.tgz
+*.gem
+.rspec_status
+Gemfile.lock

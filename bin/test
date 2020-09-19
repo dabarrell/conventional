@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+echo "--- Preparing"
+mkdir -p coverage
+
+echo "--- Running rspec"
+export COVERAGE_THRESHOLD=95
+COVERAGE=true bundle exec rake spec
+
+echo "--- Verifying coverage"
+bundle exec rake spec:verify_coverage
+
+echo "--- :package: Compressing build output"
+tar cz -f "coverage.tgz" coverage
