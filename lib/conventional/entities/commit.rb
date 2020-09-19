@@ -6,6 +6,11 @@ require "conventional/types"
 module Conventional
   module Entities
     class Commit < Dry::Struct
+      class Revert < Dry::Struct
+        attribute :header, Types::String
+        attribute :hash, Types::String
+      end
+
       attribute :header, Types::String
       attribute :body, Types::String.optional
       attribute :footer, Types::String.optional
@@ -15,10 +20,7 @@ module Conventional
       attribute :subject, Types::String.optional
       attribute :hash, Types::String.optional
       attribute :mentions, Types::Array.of(Types::Coercible::String)
-      attribute :revert do
-        attribute :header, Types::String.optional
-        attribute :hash, Types::String.optional
-      end
+      attribute :revert, Revert.optional
     end
   end
 end

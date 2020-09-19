@@ -104,10 +104,12 @@ module Conventional
 
       def match_revert(raw_commit)
         match = raw_commit.match REVERT_PATTERN
-        {
-          header: match ? match[:header] : nil,
-          hash: match ? match[:hash] : nil
-        }
+        if match
+          {
+            header: match[:header],
+            hash: match[:hash]
+          }
+        end
       end
 
       def trim_new_lines(raw)
