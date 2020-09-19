@@ -16,7 +16,7 @@ RSpec.describe Conventional::Git::GetRawCommits, "#call" do
       let(:path) { nil }
 
       it "executes git log command" do
-        expect(Conventional::Utils).to receive(:exec).with(%(git log --date=short --format="%B%n-hash-%n%H%n#{described_class::DELIMITER}" HEAD)).and_return(response)
+        expect(Conventional::Utils).to receive(:exec).with(%(git log --date=short --format="%B%n-id-%n%H%n#{described_class::DELIMITER}" HEAD)).and_return(response)
         expect(result).to match_array commits
       end
     end
@@ -25,7 +25,7 @@ RSpec.describe Conventional::Git::GetRawCommits, "#call" do
       let(:path) { "filepath/" }
 
       it "executes git log command" do
-        expect(Conventional::Utils).to receive(:exec).with(%(git log --date=short --format="%B%n-hash-%n%H%n#{described_class::DELIMITER}" HEAD -- #{path})).and_return(response)
+        expect(Conventional::Utils).to receive(:exec).with(%(git log --date=short --format="%B%n-id-%n%H%n#{described_class::DELIMITER}" HEAD -- #{path})).and_return(response)
         expect(result).to match_array commits
       end
     end
@@ -38,7 +38,7 @@ RSpec.describe Conventional::Git::GetRawCommits, "#call" do
       let(:path) { nil }
 
       it "executes git log command" do
-        expect(Conventional::Utils).to receive(:exec).with(%(git log --date=short --format="%B%n-hash-%n%H%n#{described_class::DELIMITER}" #{from}..HEAD)).and_return(response)
+        expect(Conventional::Utils).to receive(:exec).with(%(git log --date=short --format="%B%n-id-%n%H%n#{described_class::DELIMITER}" #{from}..HEAD)).and_return(response)
         expect(result).to match_array commits
       end
     end
@@ -47,7 +47,7 @@ RSpec.describe Conventional::Git::GetRawCommits, "#call" do
       let(:path) { "filepath/" }
 
       it "executes git log command" do
-        expect(Conventional::Utils).to receive(:exec).with(%(git log --date=short --format="%B%n-hash-%n%H%n#{described_class::DELIMITER}" #{from}..HEAD -- #{path})).and_return(response)
+        expect(Conventional::Utils).to receive(:exec).with(%(git log --date=short --format="%B%n-id-%n%H%n#{described_class::DELIMITER}" #{from}..HEAD -- #{path})).and_return(response)
         expect(result).to match_array commits
       end
     end

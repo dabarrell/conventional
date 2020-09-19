@@ -4,7 +4,7 @@ module Conventional
   module Git
     class GetRawCommits
       DELIMITER = "///////////////////////////////////////////////"
-      FORMAT = "%B%n-hash-%n%H"
+      FORMAT = "%B%n-id-%n%H"
 
       def call(from: nil, path: nil)
         cmd = ["git log --date=short"]

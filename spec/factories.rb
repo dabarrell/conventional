@@ -17,7 +17,7 @@ FactoryBot.define do
     type { nil }
     scope { nil }
     subject { nil }
-    hash { nil }
+    id { "commit-id" }
     mentions { [] }
     revert { nil }
 
