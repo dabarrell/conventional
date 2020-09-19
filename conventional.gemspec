@@ -38,6 +38,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "standard", "~> 0.6.0"
   spec.add_development_dependency "simplecov", "~> 0.17"
   spec.add_development_dependency "bundler-audit", "~> 0.6"
+  spec.add_development_dependency "factory_bot", "~> 6.1"
 
   spec.add_runtime_dependency "gem-release", "~> 2.1"
   spec.add_runtime_dependency "dry-cli", "~> 0.6.0"

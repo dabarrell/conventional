@@ -1,20 +1,25 @@
 # frozen_string_literal: true
 
+require "dry-struct"
 require "conventional/entities/commit"
 
 module Conventional
   module Git
     class ParseCommit
+      InvalidRawCommit = Class.new(StandardError)
+
       HEADER_PATTERN = /^(?<type>\w*)(?:\((?<scope>.*)\))?!?: (?<subject>.*)$/i
       BREAKING_CHANGE_HEADER_PATTERN = /^(?:\w*)(?:\((?:.*)\))?!: (?<subject>.*)$/i
       BREAKING_CHANGE_BODY_PATTERN = /^[\\s|*]*(?:BREAKING CHANGE)[:\\s]+(?<contents>.*)/
       FIELD_PATTERN = /^-(.*?)-$/
-      REVERT_PATTERN = /^(?:Revert|revert:)\s"?(?<header>[\s\S]+?)"?\s*This reverts commit (?<hash>\w*)\./i
+      REVERT_PATTERN = /^(?:Revert|revert:)\s"?(?<header>[\s\S]+?)"?\s*This reverts commit (?<id>\w*)\./i
       MENTION_PATTERN = /@([\w-]+)/
 
       def call(raw_commit:)
+        raise InvalidRawCommit unless raw_commit.is_a?(String)
+
         header, *lines = trim_new_lines(raw_commit).split(/\r?\n+/)
-        return nil if header.nil?
+        raise InvalidRawCommit if header.nil?
 
         Conventional::Entities::Commit.new(
           **match_header_parts(header),
@@ -23,6 +28,8 @@ module Conventional
           mentions: match_mentions(raw_commit),
           revert: match_revert(raw_commit)
         )
+      rescue Dry::Struct::Error
+        raise InvalidRawCommit
       end
 
       private
@@ -99,15 +106,17 @@ module Conventional
       end
 
       def match_mentions(raw_commit)
-        raw_commit.scan(MENTION_PATTERN).flatten
+        raw_commit.scan(MENTION_PATTERN).flatten.uniq
       end
 
       def match_revert(raw_commit)
         match = raw_commit.match REVERT_PATTERN
-        {
-          header: match ? match[:header] : nil,
-          hash: match ? match[:hash] : nil
-        }
+        if match
+          {
+            header: match[:header],
+            id: match[:id]
+          }
+        end
       end
 
       def trim_new_lines(raw)
