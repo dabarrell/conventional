@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require "rubygems/version"
 require "conventional/utils"
+require "conventional/entities/tag"
 
 module Conventional
   module Git
@@ -19,7 +21,13 @@ module Conventional
 
           matches.each do |tag|
             m = tag.match(tag_prefix_regex)
-            tags << tag if m && Gem::Version.correct?(m[1])
+            if m && Gem::Version.correct?(m[1])
+              tags << Conventional::Entities::Tag.new(
+                value: tag,
+                version: Gem::Version.new(m[1]),
+                prefix: prefix
+              )
+            end
           end
         end
 
