@@ -4,7 +4,7 @@ require "simplecov"
 
 suite = Test::Suite.instance
 
-# # Ensure appropriate names when running tests across multiple CI jobs
+# Ensure appropriate names when running tests across multiple CI jobs
 SimpleCov.command_name(suite.test_group_name) if suite.parallel?
 
 SimpleCov.configure do
