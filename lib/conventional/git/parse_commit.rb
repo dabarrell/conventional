@@ -11,25 +11,23 @@ module Conventional
       HEADER_PATTERN = /^(?<type>\w*)(?:\((?<scope>.*)\))?!?: (?<subject>.*)$/i
       BREAKING_CHANGE_HEADER_PATTERN = /^(?:\w*)(?:\((?:.*)\))?!: (?<subject>.*)$/i
       BREAKING_CHANGE_BODY_PATTERN = /^[\\s|*]*(?:BREAKING CHANGE)[:\\s]+(?<contents>.*)/
-      FIELD_PATTERN = /^-(.*?)-$/
       REVERT_PATTERN = /^(?:Revert|revert:)\s"?(?<header>[\s\S]+?)"?\s*This reverts commit (?<id>\w*)\./i
       MENTION_PATTERN = /@([\w-]+)/
 
       def call(raw_commit:)
         raise InvalidRawCommit unless raw_commit.is_a?(String)
 
-        header, *lines = trim_new_lines(raw_commit).split(/\r?\n+/)
-        raise InvalidRawCommit if header.nil?
+        id, header, *lines = trim_new_lines(raw_commit).split(/\r?\n+/)
+        raise InvalidRawCommit if id.nil? || header.nil?
 
         Conventional::Entities::Commit.new(
+          id: id,
           **match_header_parts(header),
           **extract_contents(header, lines),
           header: header,
           mentions: match_mentions(raw_commit),
           revert: match_revert(raw_commit)
         )
-      rescue Dry::Struct::Error
-        raise InvalidRawCommit
       end
 
       private
@@ -42,7 +40,6 @@ module Conventional
         }
 
         initial_state = {
-          current_processed_field: false,
           continue_breaking_change: false
         }
 
@@ -57,20 +54,6 @@ module Conventional
       end
 
       def process_line(line, contents, state)
-        field_match = line.match FIELD_PATTERN
-        if field_match
-          state[:current_processed_field] = field_match[1]
-
-          return [contents, state]
-        end
-
-        if state[:current_processed_field]
-          contents[state[:current_processed_field].to_sym] = append(contents[state[:current_processed_field]], line)
-          state[:current_processed_field] = false
-
-          return [contents, state]
-        end
-
         contents[:breaking_change] ||= match_breaking_change_body(line)
 
         if contents[:breaking_change]
