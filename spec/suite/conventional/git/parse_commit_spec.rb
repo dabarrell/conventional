@@ -4,21 +4,6 @@ require "conventional/entities/commit"
 require "conventional/git/parse_commit"
 
 RSpec.describe Conventional::Git::ParseCommit, "#call" do
-  # Produces a string similar to the following:
-  #   chore: Release v1.0.4 [skip ci]
-  #
-  #   -id-
-  #   a034f2b97fc4b50c48e9874809cc933b0a705989
-  def generate_raw_commit(header:, lines: [])
-    components = []
-
-    components << header
-    components.concat(lines)
-    components << "-id-"
-    components << "a034f2b97fc4b50c48e9874809cc933b0a705989"
-    components.join("\n") + "\n"
-  end
-
   subject(:result) { described_class.new.call(raw_commit: raw_commit) }
 
   context "raw_commit is nil" do
@@ -234,5 +219,18 @@ RSpec.describe Conventional::Git::ParseCommit, "#call" do
         )
       )
     end
+  end
+
+  # Produces a string similar to the following:
+  #   a034f2b97fc4b50c48e9874809cc933b0a705989
+  #   <header>
+  #   <body (multiple lines)>
+  def generate_raw_commit(header:, lines: [])
+    components = []
+
+    components << "a034f2b97fc4b50c48e9874809cc933b0a705989"
+    components << header
+    components.concat(lines)
+    components.join("\n") + "\n"
   end
 end
