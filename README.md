@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/conventional.svg)](https://badge.fury.io/rb/conventional)
 [![Gem Version](https://github.com/dabarrell/conventional/workflows/Verify/badge.svg)](https://github.com/dabarrell/conventional/actions?query=workflow%3AVerify)
+[![Coverage Status](https://coveralls.io/repos/github/dabarrell/conventional/badge.svg?branch=master)](https://coveralls.io/github/dabarrell/conventional?branch=master)
 
 `conventional` bridges the gap in automating version management for Ruby gems from start to finish. Using
 [Conventional Commits](https://conventionalcommits.org), it allows you to automate the process from commit to release.
