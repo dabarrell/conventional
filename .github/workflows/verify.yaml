@@ -1,9 +1,7 @@
 name: Verify
 
 on:
-  push:
-    branches: ['*']
-    tags: ['!*']
+  - push
 
 jobs:
   audit:
