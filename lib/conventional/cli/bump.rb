@@ -20,8 +20,6 @@ module Conventional
       option :push, type: :boolean, default: true, desc: "Push changes to git remote"
       option :dry_run, type: :boolean, default: false, desc: "Completes a dry run without making any changes"
 
-      NoTagsFound = Class.new(StandardError)
-
       def initialize(
         get_sem_ver_tags: Conventional::Git::GetSemVerTags.new,
         get_raw_commits: Conventional::Git::GetRawCommits.new,
