@@ -1,20 +1,44 @@
-# Conventional
+# conventional
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/conventional`. To experiment with that code, run `bin/console` for an interactive prompt.
+[![Gem Version](https://badge.fury.io/rb/conventional.svg)](https://badge.fury.io/rb/conventional)
+[![Gem Version](https://github.com/dabarrell/conventional/workflows/Verify/badge.svg)](https://github.com/dabarrell/conventional/actions?query=workflow%3AVerify)
 
-## Installation
+`conventional` bridges the gap in automating version management for Ruby gems from start to finish. Using
+[Conventional Commits](https://conventionalcommits.org), it allows you to automate the process from commit to release.
 
-Add this line to your application's Gemfile:
+## Install
+
+Add this line to your Gemfile:
 
 ```ruby
 gem 'conventional'
 ```
 
-And then execute:
+and run `bundle install` from your shell.
 
-    $ bundle install
+To install the gem manually, run:
 
-Or install it yourself as:
+```
+gem install conventional
+```
 
-    $ gem install conventional
+## Usage
 
+<!-- TODO -->
+
+## See also
+
+Check out these similar projects, which served as inspiration for `conventional`.
+
+- [`conventional-changelog`](https://github.com/conventional-changelog) (JS)
+- [`lerna`](https://github.com/lerna/lerna) (JS)
+- [`github-changelog-generator`](https://github.com/github-changelog-generator/github-changelog-generator) (Ruby)
+- [`gem-release`](https://github.com/svenfuchs/gem-release) (Ruby)
+
+## License
+
+`conventional` is distributed under the [MIT License](LICENSE.txt).
+
+## Author
+
+- David Barrell ([@dabarrell](https://github.com/dabarrell), [davidbarrell.me](https://davidbarrell.me))
