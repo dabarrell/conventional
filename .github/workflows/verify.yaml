@@ -1,6 +1,6 @@
 name: Verify
 
-on: [push]
+on: ["push", "pull_request"]
 
 jobs:
   audit:
@@ -43,6 +43,8 @@ jobs:
         with:
           ruby-version: 2.7.x
       - name: Run tests
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3

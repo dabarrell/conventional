@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "simplecov"
+require "coveralls"
 
 suite = Test::Suite.instance
 
@@ -8,12 +9,10 @@ suite = Test::Suite.instance
 SimpleCov.command_name(suite.test_group_name) if suite.parallel?
 
 SimpleCov.configure do
-  enable_coverage :branch
-
   # Exclude test suite
   add_filter "/spec/"
 
-  self.formatters = [SimpleCov::Formatter::HTMLFormatter]
+  self.formatters = [SimpleCov::Formatter::HTMLFormatter, Coveralls::SimpleCov::Formatter]
 end
 
 SimpleCov.at_exit do
