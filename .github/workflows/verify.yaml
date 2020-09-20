@@ -51,4 +51,4 @@ jobs:
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3
-          bin/test
+          COVERALLS_GIT_BRANCH="${GITHUB_REF/refs\/heads\//}" bin/test
